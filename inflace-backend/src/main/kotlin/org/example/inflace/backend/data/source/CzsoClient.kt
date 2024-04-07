@@ -1,29 +1,28 @@
-package org.example.inflace.backend
+package org.example.inflace.backend.data.source
 
+import org.example.inflace.backend.YearMonthSeries
+import org.example.inflace.backend.YearMonthValue
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.springframework.stereotype.Service
-import java.time.LocalDate
+import org.springframework.stereotype.Component
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-
-typealias EcoicopCpiData = List<Pair<LocalDate, Float>>
-
-@Service
-class Downloader {
+@Component
+class CzsoClient {
     companion object {
         const val ECOICOP_CPI_URL =
             "https://vdb.czso.cz/vdbvo2/faces/cs/index.jsf?page=vystup-objekt&z=T&f=TABULKA&ds=ds2329&pvo=C" +
                     "EN083A&skupId=2218&katalog=31779&o=false&evo=v2504_%21_CEN-SPO-BAZIC2015-EM_1&str=v514"
     }
 
-    fun downloadEcoicopCpiData(): EcoicopCpiData {
+    fun scrapeEcoicopCpiData(): YearMonthSeries<Float> {
         val document: Document = Jsoup.connect(ECOICOP_CPI_URL).get()
         return parseEcoicopCpiDocument(document)
     }
 
-    private fun parseEcoicopCpiDocument(document: Document): EcoicopCpiData {
-        val data: MutableList<Pair<LocalDate, Float>> = mutableListOf()
+    private fun parseEcoicopCpiDocument(document: Document): YearMonthSeries<Float> {
+        val data: MutableList<YearMonthValue<Float>> = mutableListOf()
 
         val rows = document.select("#tabData>tbody>tr")
         for (row in rows) {
@@ -34,11 +33,11 @@ class Downloader {
                             "This indicates change in the table's structure."
                 )
 
-            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            val date = LocalDate.parse("01/" + cols[0].text(), formatter)
+            val formatter = DateTimeFormatter.ofPattern("MM/yyyy")
+            val date = YearMonth.parse(cols[0].text(), formatter)
             val value = cols[1].text().replace(",", ".").toFloat()
 
-            data.add(Pair(date, value))
+            data.add(YearMonthValue(date, value))
         }
 
         return data

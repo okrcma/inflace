@@ -1,18 +1,19 @@
 package org.example.inflace.backend.api
 
-import org.example.inflace.backend.EcoicopCpiData
-import java.time.LocalDate
+import java.time.YearMonth
 
-data class EcoicopCpiDataSchema(
-    val data: List<EcoicopCpiDatapointSchema>
-) {
-    companion object {
-        fun fromEcoicopCpiData(data: EcoicopCpiData): EcoicopCpiDataSchema {
-            return EcoicopCpiDataSchema(data.map { EcoicopCpiDatapointSchema(date = it.first, value = it.second) })
-        }
-    }
-}
+data class CpiDataSchema(
+    val from: YearMonth?,
+    val to: YearMonth?,
+    val data: List<CpiDatapointSchema>
+)
 
-data class EcoicopCpiDatapointSchema(
-    val date: LocalDate, val value: Float
+data class CpiDatapointSchema(
+    val yearMonth: YearMonth, val value: Float
+)
+
+data class InflationRateValueSchema(
+    val from: YearMonth,
+    val to: YearMonth,
+    val value: Float,
 )
