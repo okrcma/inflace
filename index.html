@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Kalkulačka české inflace mezi dvěma měsíci podle indexu spotřebitelských cen ČSÚ.">
+<title>Inflace v Česku</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232a78d6'/%3E%3Ctext x='32' y='45' font-size='38' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'%3E%25%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="app" class="app">
+  <header class="header">
+    <h1>Inflace v&nbsp;Česku</h1>
+    <p class="subtitle">Kalkulačka inflace z&nbsp;indexu spotřebitelských cen ČSÚ</p>
+  </header>
+
+  <noscript>
+    <style>.controls-card, .result-card, .chart-card, .categories-card { display: none; }</style>
+    <p class="subtitle">Stránka vyžaduje JavaScript – bez něj se
+    kalkulačka nenačte.</p>
+  </noscript>
+
+  <section class="card controls-card" aria-label="Volba období">
+    <div class="controls">
+      <div class="control">
+        <span class="control-label">Od</span>
+        <button type="button" class="month-button" id="start-button"
+                aria-haspopup="dialog" aria-expanded="false">–</button>
+      </div>
+      <span class="controls-arrow" aria-hidden="true">→</span>
+      <div class="control">
+        <span class="control-label">Do</span>
+        <button type="button" class="month-button" id="end-button"
+                aria-haspopup="dialog" aria-expanded="false">–</button>
+      </div>
+    </div>
+    <div id="month-popup" class="month-popup" role="dialog" aria-label="Výběr měsíce" hidden>
+      <div class="popup-year">
+        <button type="button" id="year-prev" aria-label="Předchozí rok">‹</button>
+        <button type="button" id="popup-year-label"></button>
+        <button type="button" id="year-next" aria-label="Další rok">›</button>
+      </div>
+      <div class="month-grid" id="month-grid"></div>
+    </div>
+    <p id="input-error" class="input-error" hidden></p>
+  </section>
+
+  <section class="card result-card" aria-live="polite">
+    <p class="hero-label">Celková inflace</p>
+    <p id="hero-value" class="hero-value">–</p>
+    <p id="hero-period" class="hero-period"></p>
+    <div class="tiles">
+      <div class="tile">
+        <p class="tile-label">Průměrně ročně</p>
+        <p id="tile-annual" class="tile-value">–</p>
+      </div>
+      <div class="tile">
+        <p class="tile-label">Co stálo 100&nbsp;Kč, stojí</p>
+        <p id="tile-price" class="tile-value">–</p>
+      </div>
+      <div class="tile">
+        <p class="tile-label">Délka období</p>
+        <p id="tile-length" class="tile-value">–</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card chart-card">
+    <h2>Index spotřebitelských cen <span class="muted">(průměr roku 2025&nbsp;=&nbsp;100)</span></h2>
+    <div id="chart-wrap" class="chart-wrap">
+      <svg id="chart" role="img" aria-label="Vývoj indexu spotřebitelských cen v čase"></svg>
+      <div id="chart-tooltip" class="tooltip" hidden></div>
+    </div>
+  </section>
+
+  <section class="card categories-card">
+    <h2>Inflace podle kategorií</h2>
+    <p id="categories-period" class="card-subtitle"></p>
+    <div id="categories"></div>
+  </section>
+
+  <footer class="footer">
+    <p>Zdroj dat: <a href="https://csu.gov.cz" rel="external">Český statistický úřad</a> –
+    sada CEN0101E (data.csu.gov.cz),
+    <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu" rel="external">podmínky užití</a>,
+    licence <a href="https://creativecommons.org/licenses/by/4.0/" rel="external">CC&nbsp;BY&nbsp;4.0</a>.
+    Výpočet z&nbsp;bazického indexu, průměr roku 2025&nbsp;=&nbsp;100.
+    Data aktualizována <span id="updated">–</span>.</p>
+    <p>Neoficiální projekt; není provozován ani podporován ČSÚ.
+    Údaje jsou pouze informativní.</p>
+  </footer>
+</main>
+
+<div id="error-screen" class="error-screen" hidden>
+  <div class="card error-card">
+    <h2>Data nejsou k&nbsp;dispozici</h2>
+    <p id="error-message"></p>
+    <button id="retry-button" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script src="math.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

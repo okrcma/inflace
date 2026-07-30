@@ -1,0 +1,54 @@
+name: Update CPI data
+
+on:
+  schedule:
+    - cron: "45 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0  # full history so `git pull --rebase` can't hit a shallow boundary
+
+      - name: Run tests
+        run: |
+          python3 -m unittest discover -s tests
+          node tests/test_math.js
+
+      - name: Fetch CPI data
+        run: python3 tools/fetch_cpi.py
+
+      - name: Verify fetched data
+        run: |
+          python3 - <<'EOF'
+          import json
+          d = json.load(open("data/cpi.json"))
+          total = d["series"]["0"]
+          assert d["months"] == sorted(total), "months/total mismatch"
+          pin = round((total["2024-01"] / total["2018-01"] - 1) * 100, 2)
+          assert pin == 43.18, f"reference pin drifted: {pin}"
+          EOF
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- data/cpi.json; then
+            echo "No data change."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cpi.json
+          git commit -m "data: update CPI index"
+          git pull --rebase
+          git push

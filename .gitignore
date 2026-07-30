@@ -1,0 +1,9 @@
+CLAUDE.md
+docs/
+scratchpad/
+__pycache__/
+*.pyc
+*.tmp
+.DS_Store
+*.swp
+*~
